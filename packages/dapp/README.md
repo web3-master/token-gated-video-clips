@@ -1,2 +1,2 @@
-# my-nft-market-dapp
-Simple NFT market place front end web site developed by using react.js and antd.
+# dapp
+Token gated video clips web site front end developed by using react.js and antd.
