@@ -5,8 +5,15 @@ import Home from "../containers/home/Home";
 import Creator from "../containers/creator/Creator";
 import Videos from "../containers/videos/Videos";
 import Video from "../containers/video/Video";
+import VideoCreate from "../containers/creator/VideoCreate";
+import Account from "../components/Account";
+import WrongNetwork from "../components/WrongNetwork";
+import { useContext } from "react";
+import Web3Context from "../web3/store/web3-context";
 
 const AppLayout = () => {
+  const web3Ctx = useContext(Web3Context);
+
   return (
     <Row>
       <Col span={24}>
@@ -14,17 +21,29 @@ const AppLayout = () => {
           <Header
             style={{ backgroundColor: "white", height: 100, paddingTop: 20 }}
           >
-            <Link to="/">
-              <Typography.Title>Token Gated Video Clips</Typography.Title>
-            </Link>
+            <Row justify="space-between">
+              <Col flex={1}>
+                <Link to="/">
+                  <Typography.Title>Token Gated Video Clips</Typography.Title>
+                </Link>
+              </Col>
+              <Col>
+                <Account />
+              </Col>
+            </Row>
           </Header>
           <Content>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/creator" element={<Creator />} />
-              <Route path="/videos" element={<Videos />} />
-              <Route path="/video" element={<Video />} />
-            </Routes>
+            {web3Ctx.networkId == 3 ? (
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/creator" element={<Creator />} />
+                <Route path="/video-create" element={<VideoCreate />} />
+                <Route path="/videos" element={<Videos />} />
+                <Route path="/video" element={<Video />} />
+              </Routes>
+            ) : (
+              <WrongNetwork />
+            )}
           </Content>
           <Footer
             style={{
