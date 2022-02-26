@@ -10,6 +10,7 @@ import Account from "../components/Account";
 import WrongNetwork from "../components/WrongNetwork";
 import { useContext } from "react";
 import Web3Context from "../web3/store/web3-context";
+import Detail from "../containers/videos/Detail";
 
 const AppLayout = () => {
   const web3Ctx = useContext(Web3Context);
@@ -39,6 +40,7 @@ const AppLayout = () => {
                 <Route path="/creator" element={<Creator />} />
                 <Route path="/video-create" element={<VideoCreate />} />
                 <Route path="/videos" element={<Videos />} />
+                <Route path="/detail/:id" element={<Detail />} />
                 <Route path="/video" element={<Video />} />
               </Routes>
             ) : (
