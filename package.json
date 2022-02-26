@@ -1,0 +1,29 @@
+{
+  "name": "token-gated-video-clips",
+  "version": "1.0.0",
+  "description": "Simple video clip sharing marketplace protected by NFT token gating.",
+  "scripts": {
+    "chain": "npm run chain --workspace contract",
+    "deploy-local": "npm run deploy-local --workspace contract",
+    "deploy-ropsten": "npm run deploy-ropsten --workspace contract",
+    "start": "npm run start --workspace dapp",
+    "build": "npm run build --workspace dapp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dany-armstrong/token-gated-video-clips.git"
+  },
+  "keywords": [
+    "nft",
+    "token-gated"
+  ],
+  "author": "daniel armstrong",
+  "license": "BSL-1.0",
+  "bugs": {
+    "url": "https://github.com/dany-armstrong/token-gated-video-clips/issues"
+  },
+  "homepage": "https://github.com/dany-armstrong/token-gated-video-clips#readme",
+  "workspaces": [
+    "./packages/*"
+  ]
+}
