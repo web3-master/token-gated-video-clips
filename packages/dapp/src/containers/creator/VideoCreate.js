@@ -151,7 +151,7 @@ const VideoCreate = () => {
   if (mintSuccess) {
     return (
       <Result
-        style={{ marginTop: 60 }}
+        style={{ marginTop: 20 }}
         status="success"
         title="Successfully created new video and access token!"
         subTitle="You can check this new video and token in videos page."
@@ -172,18 +172,18 @@ const VideoCreate = () => {
   }
 
   return (
-    <Row style={{ margin: 60 }}>
+    <Row style={{ margin: 20 }}>
       {minting && (
-        <Col span={12} offset={6}>
+        <Col>
           <Alert message="Minting..." type="info" showIcon />
         </Col>
       )}
       {uploading && (
-        <Col span={12} offset={6}>
+        <Col>
           <Alert message="Uploading metadata..." type="info" showIcon />
         </Col>
       )}
-      <Col span={12} offset={6} style={{ marginTop: 10 }}>
+      <Col span={24} style={{ marginTop: 10 }}>
         <Card title="Create New Video">
           <Form
             form={form}

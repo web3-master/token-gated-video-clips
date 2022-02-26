@@ -1,32 +1,63 @@
-import { Button, Form, Input, Upload } from "antd";
+import { Button, Form, Input, notification, Upload } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import { InboxOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { getDatabase, ref, set } from "firebase/database";
+import Web3Context from "../../web3/store/web3-context";
 
-const VideoDetailForm = () => {
+const VideoDetailForm = ({ video }) => {
+  const web3Ctx = useContext(Web3Context);
   const [form] = useForm();
-  const [thumbnailImageFileBuffer, setThumbnailImageFileBuffer] =
-    useState(null);
-  const [videoFileBuffer, setVideoFileBuffer] = useState(null);
 
-  const onSave = (values) => {};
+  useEffect(() => {
+    form.setFieldsValue(video);
+  }, [video]);
 
-  const onThumbnailImageFileSelected = (file) => {
-    const reader = new window.FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onloadend = () => {
-      setThumbnailImageFileBuffer(Buffer(reader.result));
-    };
-    return false;
+  const saveVideoInFirebase = (
+    title,
+    description,
+    thumbnailImageUrl,
+    videoUrl
+  ) => {
+    const db = getDatabase();
+    const videoRef = ref(db, "videos/" + video.key);
+    set(videoRef, {
+      title: title,
+      description: description,
+      thumbnailImageUrl: thumbnailImageUrl,
+      videoUrl: videoUrl,
+      owner: video.owner,
+      receipt: video.receipt,
+    });
   };
 
-  const onVideoFileSelected = (file) => {
-    const reader = new window.FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onloadend = () => {
-      setVideoFileBuffer(Buffer(reader.result));
-    };
-    return false;
+  const onSave = async (values) => {
+    if (web3Ctx.account == null) {
+      try {
+        await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+      } catch (error) {
+        notification["error"]({
+          message: "Error",
+          description: error,
+        });
+      }
+      return;
+    }
+
+    if (web3Ctx.networkId != 3) {
+      notification["error"]({
+        message: "Error",
+        description:
+          "This network is not supported. Please connect to Ropsten network in MetaMask!",
+      });
+      return;
+    }
+
+    let { title, description, thumbnailImageUrl, videoUrl } = values;
+
+    saveVideoInFirebase(title, description, thumbnailImageUrl, videoUrl);
   };
 
   return (
@@ -36,6 +67,7 @@ const VideoDetailForm = () => {
       labelCol={8}
       wrapperCol={16}
       onFinish={onSave}
+      initialValues={video}
     >
       <Form.Item
         label="Title"
@@ -54,43 +86,24 @@ const VideoDetailForm = () => {
       </Form.Item>
 
       <Form.Item
-        label="Thumbnail Image"
-        name="thumbnailImage"
+        label="Thumbnail Image Url"
+        name="thumbnailImageUrl"
         rules={[
-          { required: true, message: "Please select video thumbnail image!" },
+          {
+            required: true,
+            message: "Please input thumbnail image url!",
+          },
         ]}
       >
-        <Upload.Dragger
-          name="thumbnailImage"
-          beforeUpload={onThumbnailImageFileSelected}
-          maxCount={1}
-        >
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">
-            Click or drag image file to this area to upload
-          </p>
-        </Upload.Dragger>
+        <Input placeholder="Input thumbnail image url." />
       </Form.Item>
 
       <Form.Item
-        label="Video"
-        name="video"
-        rules={[{ required: true, message: "Please select video file!" }]}
+        label="Video Url"
+        name="videoUrl"
+        rules={[{ required: true, message: "Please input video url!" }]}
       >
-        <Upload.Dragger
-          name="video"
-          beforeUpload={onVideoFileSelected}
-          maxCount={1}
-        >
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">
-            Click or drag video file to this area to upload
-          </p>
-        </Upload.Dragger>
+        <Input placeholder="Input video url." />
       </Form.Item>
 
       <Form.Item wrapperCol={{ offset: 6, span: 12 }}>

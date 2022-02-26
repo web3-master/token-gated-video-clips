@@ -1,57 +1,50 @@
 import { Alert, Button, Card, Col, Image, List, Row, Space } from "antd";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import VideoDetailForm from "./VideoDetailForm";
+import { getDatabase, ref, set, onValue } from "firebase/database";
+import Web3Context from "../../web3/store/web3-context";
 
 const Creator = () => {
+  const web3Ctx = useContext(Web3Context);
+  const isConnected = web3 && web3Ctx.account;
+
   const [videos, setVideos] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
-    setVideos([
-      {
-        id: 1,
-        title: "video1",
-        description: "this is video1",
-        videoUrl:
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        thumbnailUrl:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/800px-Big_Buck_Bunny_thumbnail_vlc.png",
+    const db = getDatabase();
+    const videosDbRef = ref(db, "/videos");
+    onValue(
+      videosDbRef,
+      (snapshot) => {
+        var myVideos = [];
+        snapshot.forEach((childSnapshot) => {
+          const childKey = childSnapshot.key;
+          const childData = childSnapshot.val();
+          if (childData.owner == web3Ctx.account) {
+            myVideos = [
+              ...myVideos,
+              Object.assign(childData, { key: childKey }),
+            ];
+          }
+        });
+        setVideos(myVideos);
       },
-      {
-        id: 2,
-        title: "video2",
-        description: "this is video2",
-        videoUrl:
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        thumbnailUrl:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/800px-Big_Buck_Bunny_thumbnail_vlc.png",
-      },
-      {
-        id: 3,
-        title: "video3",
-        description: "this is video3",
-        videoUrl:
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        thumbnailUrl:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/800px-Big_Buck_Bunny_thumbnail_vlc.png",
-      },
-      {
-        id: 4,
-        title: "video4",
-        description: "this is video4",
-        videoUrl:
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        thumbnailUrl:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/800px-Big_Buck_Bunny_thumbnail_vlc.png",
-      },
-    ]);
+      { onlyOnce: true }
+    );
   }, []);
 
   const renderVideoThumbnailItem = (item, key) => {
     return (
       <Card hoverable style={{ marginBottom: 20 }} bodyStyle={{ padding: 0 }}>
-        <Image src={item.thumbnailUrl} preview={false} />
+        <Image
+          src={item.thumbnailImageUrl}
+          preview={false}
+          onClick={() => {
+            setSelectedIndex(videos.indexOf(item));
+          }}
+        />
       </Card>
     );
   };
@@ -65,9 +58,9 @@ const Creator = () => {
       </Row>
       <Row gutter={10} style={{ marginTop: 20 }}>
         <Col span={4}>
-          <Card title="Thumbnails">
+          <Card title="My Videos">
             <List
-              locale={{ emptyText: "Empty" }}
+              locale={{ emptyText: "No Videos" }}
               dataSource={videos}
               renderItem={renderVideoThumbnailItem}
             />
@@ -82,26 +75,12 @@ const Creator = () => {
           )}
           {videos.length > 0 && selectedIndex >= 0 && (
             <Col>
-              <Card title="Video Detail">{<VideoDetailForm />}</Card>
+              <Card title="Video Detail">
+                {<VideoDetailForm video={videos[selectedIndex]} />}
+              </Card>
             </Col>
           )}
         </Col>
-        {/* <Col span={10}>
-          <Card title="Access Token">
-            <Row>
-              <Col span={4}>Title:</Col>
-              <Col span={20}>Video 1</Col>
-            </Row>
-            <Row>
-              <Col span={4}>Description:</Col>
-              <Col span={20}>This is video1</Col>
-            </Row>
-            <Row>
-              <Col span={4}>Thumbnail:</Col>
-              <Col span={20}></Col>
-            </Row>
-          </Card>
-        </Col> */}
       </Row>
     </Col>
   );
